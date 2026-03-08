@@ -21,83 +21,64 @@ CORS(app)  # Allow requests from your StockPulse web app
 # NEWS SOURCES — Official RSS feeds
 # ================================================================
 FEEDS = {
-    # Indian Sources
-    "moneycontrol_latest": {
-        "url": "https://www.moneycontrol.com/rss/latestnews.xml",
-        "name": "Moneycontrol",
-        "type": "india"
-    },
-    "moneycontrol_markets": {
-        "url": "https://www.moneycontrol.com/rss/marketreports.xml",
-        "name": "Moneycontrol",
-        "type": "india"
-    },
-    "et_markets": {
-        "url": "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms",
-        "name": "Economic Times",
-        "type": "india"
-    },
-    "et_stocks": {
-        "url": "https://economictimes.indiatimes.com/markets/stocks/rssfeeds/2146842.cms",
-        "name": "Economic Times",
-        "type": "india"
-    },
-    "livemint": {
-        "url": "https://www.livemint.com/rss/markets",
-        "name": "Livemint",
-        "type": "india"
-    },
-    "business_standard": {
-        "url": "https://www.business-standard.com/rss/markets-106.rss",
-        "name": "Business Standard",
-        "type": "india"
-    },
-    "financial_express": {
-        "url": "https://www.financialexpress.com/market/feed/",
-        "name": "Financial Express",
-        "type": "india"
-    },
-    "ndtv_profit": {
-        "url": "https://feeds.feedburner.com/ndtvprofit-latest",
-        "name": "NDTV Profit",
-        "type": "india"
-    },
-    "hindu_business": {
-        "url": "https://www.thehindubusinessline.com/markets/?service=rss",
-        "name": "Hindu BusinessLine",
-        "type": "india"
-    },
-    # Global Sources
-    "reuters_business": {
-        "url": "https://feeds.reuters.com/reuters/businessNews",
-        "name": "Reuters",
-        "type": "global"
-    },
-    "reuters_markets": {
-        "url": "https://feeds.reuters.com/reuters/markets",
-        "name": "Reuters Markets",
-        "type": "global"
-    },
-    "ft_markets": {
-        "url": "https://www.ft.com/markets?format=rss",
-        "name": "Financial Times",
-        "type": "global"
-    },
-    "wsj_markets": {
-        "url": "https://feeds.a.dj.com/rss/RSSMarketsMain.xml",
-        "name": "Wall Street Journal",
-        "type": "global"
-    },
-    "cnbc_world": {
-        "url": "https://www.cnbc.com/id/15839069/device/rss/rss.xml",
-        "name": "CNBC",
-        "type": "global"
-    },
-    "nikkei": {
-        "url": "https://asia.nikkei.com/rss/feed/site",
-        "name": "Nikkei Asia",
-        "type": "global"
-    },
+    # ── Tier 1: Core Indian Business/Market ─────────────────────
+    "et_markets":        {"url":"https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms","name":"Economic Times","type":"india"},
+    "et_stocks":         {"url":"https://economictimes.indiatimes.com/markets/stocks/rssfeeds/2146842.cms","name":"Economic Times","type":"india"},
+    "et_economy":        {"url":"https://economictimes.indiatimes.com/economy/rssfeeds/1373380680.cms","name":"Economic Times","type":"india"},
+    "et_auto":           {"url":"https://auto.economictimes.indiatimes.com/rss/topstories","name":"ET Auto","type":"india"},
+    "et_energy":         {"url":"https://energy.economictimes.indiatimes.com/rss/topstories","name":"ET EnergyWorld","type":"india"},
+    "et_retail":         {"url":"https://retail.economictimes.indiatimes.com/rss/topstories","name":"ET Retail","type":"india"},
+    "et_telecom":        {"url":"https://telecom.economictimes.indiatimes.com/rss/topstories","name":"ET Telecom","type":"india"},
+    "moneycontrol":      {"url":"https://www.moneycontrol.com/rss/latestnews.xml","name":"Moneycontrol","type":"india"},
+    "moneycontrol_mkt":  {"url":"https://www.moneycontrol.com/rss/marketreports.xml","name":"Moneycontrol","type":"india"},
+    "livemint_markets":  {"url":"https://www.livemint.com/rss/markets","name":"Mint","type":"india"},
+    "livemint_companies":{"url":"https://www.livemint.com/rss/companies","name":"Mint","type":"india"},
+    "livemint_industry": {"url":"https://www.livemint.com/rss/industry","name":"Mint","type":"india"},
+    "bs_markets":        {"url":"https://www.business-standard.com/rss/markets-106.rss","name":"Business Standard","type":"india"},
+    "bs_companies":      {"url":"https://www.business-standard.com/rss/companies-101.rss","name":"Business Standard","type":"india"},
+    "bs_economy":        {"url":"https://www.business-standard.com/rss/economy-policy-102.rss","name":"Business Standard","type":"india"},
+    "financial_express": {"url":"https://www.financialexpress.com/market/feed/","name":"Financial Express","type":"india"},
+    "fe_economy":        {"url":"https://www.financialexpress.com/economy/feed/","name":"Financial Express","type":"india"},
+    "business_today":    {"url":"https://www.businesstoday.in/rssfeeds/1260657.cms","name":"Business Today","type":"india"},
+    "cnbctv18":          {"url":"https://www.cnbctv18.com/commonfeeds/v1/eng/rss/market.xml","name":"CNBC-TV18","type":"india"},
+    "cnbctv18_biz":      {"url":"https://www.cnbctv18.com/commonfeeds/v1/eng/rss/business.xml","name":"CNBC-TV18","type":"india"},
+    "ndtv_profit":       {"url":"https://feeds.feedburner.com/ndtvprofit-latest","name":"NDTV Profit","type":"india"},
+    "ndtv_profit2":      {"url":"https://www.ndtvprofit.com/latest/feed","name":"NDTV Profit","type":"india"},
+    "hindu_biz":         {"url":"https://www.thehindubusinessline.com/markets/?service=rss","name":"Hindu BusinessLine","type":"india"},
+    "hindu_biz_co":      {"url":"https://www.thehindubusinessline.com/companies/?service=rss","name":"Hindu BusinessLine","type":"india"},
+    "toi_business":      {"url":"https://timesofindia.indiatimes.com/rssfeeds/1898055.cms","name":"Times of India","type":"india"},
+    "toi_economy":       {"url":"https://timesofindia.indiatimes.com/rssfeeds/1898281.cms","name":"Times of India","type":"india"},
+    "zeebiz":            {"url":"https://www.zeebiz.com/markets/rss","name":"Zee Business","type":"india"},
+    "zeebiz_co":         {"url":"https://www.zeebiz.com/companies/rss","name":"Zee Business","type":"india"},
+    "firstpost_biz":     {"url":"https://www.firstpost.com/rss/business.xml","name":"Firstpost","type":"india"},
+    "theprint_economy":  {"url":"https://theprint.in/economy/feed/","name":"The Print","type":"india"},
+    "yourstory":         {"url":"https://yourstory.com/feed","name":"YourStory","type":"india"},
+    "inc42":             {"url":"https://inc42.com/feed/","name":"Inc42","type":"india"},
+    "entrackr":          {"url":"https://entrackr.com/feed/","name":"Entrackr","type":"india"},
+    "medianama":         {"url":"https://www.medianama.com/feed/","name":"MediaNama","type":"india"},
+    "techcircle":        {"url":"https://techcircle.vccircle.com/feed","name":"TechCircle","type":"india"},
+    "vccircle":          {"url":"https://www.vccircle.com/feed","name":"VCCircle","type":"india"},
+    "oilprice":          {"url":"https://oilprice.com/rss/main","name":"OilPrice","type":"india"},
+    "freepressjournal":  {"url":"https://www.freepressjournal.in/business/feed","name":"Free Press Journal","type":"india"},
+    "newsbytes_biz":     {"url":"https://www.newsbytesapp.com/news/business/rss","name":"NewsBytes","type":"india"},
+    "rediff_biz":        {"url":"https://rss.rediff.com/rss/money.htm","name":"Rediff","type":"india"},
+    # ── Tier 2: Global Markets ───────────────────────────────────
+    "reuters_biz":       {"url":"https://feeds.reuters.com/reuters/businessNews","name":"Reuters","type":"global"},
+    "reuters_markets":   {"url":"https://feeds.reuters.com/reuters/markets","name":"Reuters","type":"global"},
+    "bloomberg_mkt":     {"url":"https://feeds.bloomberg.com/markets/news.rss","name":"Bloomberg","type":"global"},
+    "bloomberg_biz":     {"url":"https://feeds.bloomberg.com/economics/news.rss","name":"Bloomberg","type":"global"},
+    "ft_markets":        {"url":"https://www.ft.com/markets?format=rss","name":"Financial Times","type":"global"},
+    "ft_companies":      {"url":"https://www.ft.com/companies?format=rss","name":"Financial Times","type":"global"},
+    "wsj_markets":       {"url":"https://feeds.a.dj.com/rss/RSSMarketsMain.xml","name":"Wall Street Journal","type":"global"},
+    "wsj_biz":           {"url":"https://feeds.a.dj.com/rss/WSJcomUSBusiness.xml","name":"Wall Street Journal","type":"global"},
+    "cnbc_world":        {"url":"https://www.cnbc.com/id/15839069/device/rss/rss.xml","name":"CNBC","type":"global"},
+    "cnbc_finance":      {"url":"https://www.cnbc.com/id/10000664/device/rss/rss.xml","name":"CNBC","type":"global"},
+    "marketwatch":       {"url":"https://feeds.marketwatch.com/marketwatch/marketpulse/","name":"MarketWatch","type":"global"},
+    "seeking_alpha":     {"url":"https://seekingalpha.com/feed.xml","name":"Seeking Alpha","type":"global"},
+    "investing_com":     {"url":"https://www.investing.com/rss/news.rss","name":"Investing.com","type":"global"},
+    "yahoo_finance":     {"url":"https://finance.yahoo.com/news/rssindex","name":"Yahoo Finance","type":"global"},
+    "nikkei_asia":       {"url":"https://asia.nikkei.com/rss/feed/site","name":"Nikkei Asia","type":"global"},
+    "barrons":           {"url":"https://www.barrons.com/xml/rss/3_7014.xml","name":"Barron's","type":"global"},
 }
 
 # Google News RSS — for stock-specific searches
@@ -178,23 +159,38 @@ def fetch_feed(feed_key):
     feed_info = FEEDS.get(feed_key)
     if not feed_info:
         return []
-    try:
-        headers = {
-            'User-Agent': 'Mozilla/5.0 StockPulse News Aggregator/1.0',
-            'Accept': 'application/rss+xml, application/xml, text/xml',
-        }
-        resp = requests.get(feed_info['url'], headers=headers, timeout=10)
-        resp.raise_for_status()
-        parsed = feedparser.parse(resp.content)
-        items = []
-        for entry in parsed.entries[:20]:
-            news = item_to_news(entry, feed_info['name'], feed_info['type'])
-            if news:
-                items.append(news)
-        return items
-    except Exception as e:
-        print(f"[WARN] Feed {feed_key} failed: {e}")
-        return []
+
+    user_agents = [
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15',
+        'Feedfetcher-Google; (+http://www.google.com/feedfetcher.html)',
+    ]
+
+    for ua in user_agents:
+        try:
+            headers = {
+                'User-Agent': ua,
+                'Accept': 'application/rss+xml, application/xml, text/xml, */*',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Cache-Control': 'no-cache',
+            }
+            resp = requests.get(feed_info['url'], headers=headers, timeout=12)
+            if resp.status_code == 200 and len(resp.content) > 500:
+                parsed = feedparser.parse(resp.content)
+                if parsed.entries:
+                    items = []
+                    for entry in parsed.entries[:20]:
+                        news = item_to_news(entry, feed_info['name'], feed_info['type'])
+                        if news:
+                            items.append(news)
+                    if items:
+                        print(f"[OK] {feed_key}: {len(items)} articles")
+                        return items
+        except Exception as e:
+            continue  # try next user agent
+
+    print(f"[WARN] Feed {feed_key} failed all attempts")
+    return []
 
 def is_relevant_to_stock(news_item, symbol, company_name):
     """Check if a news article mentions this stock."""
@@ -238,10 +234,35 @@ def refresh_cache():
     for key, items in results.items():
         all_news.extend(items)
 
+    # ── Filter: keep only stock/business/finance relevant articles ──
+    MARKET_KEYWORDS = [
+        # Markets
+        'stock','share','nse','bse','sensex','nifty','market','equity','ipo',
+        'sebi','rbi','trading','investor','invest','portfolio','fund','etf',
+        # Business
+        'profit','revenue','earnings','quarterly','results','q1','q2','q3','q4',
+        'company','corporate','business','industry','sector','merger','acquisition',
+        'deal','stake','dividend','buyback','listing','delisting',
+        # Economy
+        'economy','gdp','inflation','interest rate','repo rate','monetary',
+        'fiscal','budget','tax','gst','export','import','trade','deficit',
+        # Finance
+        'bank','finance','insurance','loan','credit','debt','bond','yield',
+        'rupee','dollar','currency','forex','commodity','gold','oil','crude',
+        # Companies (common terms)
+        'ltd','limited','corp','group','industries','enterprises','holdings',
+    ]
+
+    def is_market_relevant(item):
+        text = (item.get('title','') + ' ' + item.get('excerpt','')).lower()
+        return any(kw in text for kw in MARKET_KEYWORDS)
+
+    market_news = [item for item in all_news if is_market_relevant(item)]
+
     # Sort by time, deduplicate by title
     seen_titles = set()
     unique_news = []
-    for item in sorted(all_news, key=lambda x: x['time'], reverse=True):
+    for item in sorted(market_news, key=lambda x: x['time'], reverse=True):
         title_key = item['title'][:60].lower()
         if title_key not in seen_titles:
             seen_titles.add(title_key)
@@ -249,7 +270,7 @@ def refresh_cache():
 
     cache['all_news'] = unique_news
     cache['last_updated'] = time.time()
-    print(f"[INFO] Cache updated: {len(unique_news)} articles from {len(FEEDS)} sources")
+    print(f"[INFO] Cache updated: {len(unique_news)} market articles (filtered from {len(all_news)}) across {len(FEEDS)} sources")
 
 def get_cached_news():
     """Return cached news, refreshing if stale."""
