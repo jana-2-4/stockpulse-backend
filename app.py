@@ -12,6 +12,7 @@ from datetime import datetime
 import re
 import time
 import threading
+import gc
 import os
 
 app = Flask(__name__)
@@ -179,7 +180,7 @@ def fetch_feed(feed_key):
                 parsed = feedparser.parse(resp.content)
                 if parsed.entries:
                     items = []
-                    for entry in parsed.entries[:20]:
+                    for entry in parsed.entries[:10]:  # max 10 per feed — controls memory
                         news = item_to_news(entry, feed_info['name'], feed_info['type'])
                         if news:
                             items.append(news)
@@ -216,40 +217,34 @@ cache = {
 CACHE_TTL = 6 * 60  # 6 minutes
 
 def refresh_cache():
-    """Fetch all feeds and update cache."""
+    """Fetch all feeds and update cache — memory safe with thread pool."""
     print("[INFO] Refreshing news cache...")
     all_news = []
 
-    # Fetch all feeds concurrently using threads
-    results = {}
-    def fetch_and_store(key):
-        results[key] = fetch_feed(key)
+    # Use thread pool — max 8 concurrent fetches to control memory
+    # 56 simultaneous threads on free tier = memory crash
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        futures = {executor.submit(fetch_feed, k): k for k in FEEDS}
+        for future in as_completed(futures, timeout=60):
+            try:
+                items = future.result(timeout=15)
+                all_news.extend(items)
+                del items  # free memory immediately
+            except Exception as e:
+                print(f"[WARN] Feed fetch failed: {e}")
 
-    threads = [threading.Thread(target=fetch_and_store, args=(k,)) for k in FEEDS]
-    for t in threads:
-        t.start()
-    for t in threads:
-        t.join(timeout=15)
-
-    for key, items in results.items():
-        all_news.extend(items)
-
-    # ── Filter: keep only stock/business/finance relevant articles ──
+    # Filter: keep only stock/business/finance relevant articles
     MARKET_KEYWORDS = [
-        # Markets
         'stock','share','nse','bse','sensex','nifty','market','equity','ipo',
         'sebi','rbi','trading','investor','invest','portfolio','fund','etf',
-        # Business
         'profit','revenue','earnings','quarterly','results','q1','q2','q3','q4',
         'company','corporate','business','industry','sector','merger','acquisition',
         'deal','stake','dividend','buyback','listing','delisting',
-        # Economy
         'economy','gdp','inflation','interest rate','repo rate','monetary',
         'fiscal','budget','tax','gst','export','import','trade','deficit',
-        # Finance
         'bank','finance','insurance','loan','credit','debt','bond','yield',
         'rupee','dollar','currency','forex','commodity','gold','oil','crude',
-        # Companies (common terms)
         'ltd','limited','corp','group','industries','enterprises','holdings',
     ]
 
@@ -258,8 +253,9 @@ def refresh_cache():
         return any(kw in text for kw in MARKET_KEYWORDS)
 
     market_news = [item for item in all_news if is_market_relevant(item)]
+    del all_news  # free raw list immediately
 
-    # Sort by time, deduplicate by title
+    # Sort by time, deduplicate, cap at 300 total articles
     seen_titles = set()
     unique_news = []
     for item in sorted(market_news, key=lambda x: x['time'], reverse=True):
@@ -267,10 +263,15 @@ def refresh_cache():
         if title_key not in seen_titles:
             seen_titles.add(title_key)
             unique_news.append(item)
+        if len(unique_news) >= 300:  # hard cap — prevents unbounded memory growth
+            break
+
+    del market_news  # free filtered list
 
     cache['all_news'] = unique_news
     cache['last_updated'] = time.time()
-    print(f"[INFO] Cache updated: {len(unique_news)} market articles (filtered from {len(all_news)}) across {len(FEEDS)} sources")
+    gc.collect()  # force free all temp memory from this refresh
+    print(f"[INFO] Cache updated: {len(unique_news)} articles from {len(FEEDS)} sources")
 
 def get_cached_news():
     """Return cached news, refreshing if stale."""
