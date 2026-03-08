@@ -273,7 +273,121 @@ bg_thread.start()
 # API ROUTES
 # ================================================================
 
-@app.route('/health', methods=['GET'])
+@app.route('/stock/search', methods=['GET'])
+def stock_search():
+    """
+    GET /stock/search?q=tata
+    Searches NSE for stocks matching the query.
+    Returns list of {symbol, name, exchange} results.
+    """
+    q = request.args.get('q', '').strip()
+    if not q or len(q) < 1:
+        return jsonify({'status': 'error', 'results': []})
+
+    results = []
+    seen = set()
+
+    # Try NSE autocomplete API
+    try:
+        url = f'https://www.nseindia.com/api/search/autocomplete?q={requests.utils.quote(q)}'
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Accept': 'application/json',
+            'Referer': 'https://www.nseindia.com/',
+        }
+        resp = requests.get(url, headers=headers, timeout=6)
+        if resp.ok:
+            data = resp.json()
+            for item in (data.get('symbols') or []):
+                sym = item.get('symbol','').strip()
+                name = item.get('symbol_info') or item.get('company_name') or sym
+                stype = item.get('symbol_type','')
+                # Only equity stocks
+                if sym and sym not in seen and (stype in ('EQ','') or not stype):
+                    seen.add(sym)
+                    results.append({'symbol': sym, 'name': name, 'exchange': 'NSE'})
+                if len(results) >= 8:
+                    break
+    except Exception as e:
+        print(f'[WARN] NSE search failed: {e}')
+
+    # Fallback: Tickertape search (covers BSE-only stocks)
+    if not results:
+        try:
+            url2 = f'https://api.tickertape.in/search?text={requests.utils.quote(q)}&filter=stock'
+            resp2 = requests.get(url2, headers={'User-Agent': 'Mozilla/5.0'}, timeout=5)
+            if resp2.ok:
+                data2 = resp2.json()
+                for s in (data2.get('data',{}).get('stocks') or [])[:8]:
+                    sym = s.get('ticker') or s.get('sid','')
+                    name = s.get('longName') or s.get('shortName') or sym
+                    exch = 'NSE' if 'NSE' in (s.get('exchanges') or []) else 'BSE'
+                    if sym and sym not in seen:
+                        seen.add(sym)
+                        results.append({'symbol': sym, 'name': name, 'exchange': exch})
+        except Exception as e:
+            print(f'[WARN] Tickertape search failed: {e}')
+
+    return jsonify({'status': 'ok', 'results': results})
+
+
+@app.route('/stock/verify', methods=['GET'])
+def stock_verify():
+    """
+    GET /stock/verify?symbol=RELIANCE
+    Checks if a symbol is actually listed on NSE or BSE.
+    Returns {valid: true/false, name, sector}
+    """
+    symbol = request.args.get('symbol', '').strip().upper()
+    if not symbol:
+        return jsonify({'valid': False, 'reason': 'No symbol provided'})
+
+    # Check NSE quote API
+    try:
+        url = f'https://www.nseindia.com/api/quote-equity?symbol={requests.utils.quote(symbol)}'
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Accept': 'application/json',
+            'Referer': 'https://www.nseindia.com/',
+        }
+        resp = requests.get(url, headers=headers, timeout=7)
+        if resp.ok:
+            data = resp.json()
+            if data.get('info') or data.get('priceInfo'):
+                info = data.get('info', {})
+                return jsonify({
+                    'valid': True,
+                    'symbol': symbol,
+                    'name': info.get('companyName') or symbol,
+                    'sector': info.get('industry') or 'Equity',
+                    'exchange': 'NSE',
+                })
+    except Exception as e:
+        print(f'[WARN] NSE verify failed for {symbol}: {e}')
+
+    # Fallback: check via Tickertape
+    try:
+        url2 = f'https://api.tickertape.in/search?text={requests.utils.quote(symbol)}&filter=stock'
+        resp2 = requests.get(url2, headers={'User-Agent': 'Mozilla/5.0'}, timeout=5)
+        if resp2.ok:
+            data2 = resp2.json()
+            stocks = data2.get('data', {}).get('stocks') or []
+            for s in stocks:
+                if s.get('ticker','').upper() == symbol or s.get('sid','').upper() == symbol:
+                    return jsonify({
+                        'valid': True,
+                        'symbol': symbol,
+                        'name': s.get('longName') or s.get('shortName') or symbol,
+                        'sector': s.get('sector') or 'Equity',
+                        'exchange': 'NSE' if 'NSE' in (s.get('exchanges') or []) else 'BSE',
+                    })
+    except Exception as e:
+        print(f'[WARN] Tickertape verify failed for {symbol}: {e}')
+
+    return jsonify({'valid': False, 'symbol': symbol, 'reason': 'Not found on NSE or BSE'})
+
+
+
 def health():
     """Health check — Render.com pings this to keep server alive."""
     return jsonify({
